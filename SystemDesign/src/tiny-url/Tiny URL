@@ -1,0 +1,71 @@
+Tiny URL
+-----------
+some assumptions:
+
+Twitter == 300 million users/months
+
+10% of users uses tinyurl to short url = 30 million/months
+
+
+- Length of code is 7 characters     abc.com/abcd123
+
+Capacity planning
+------------------
+
+Long URL           -> 2 kb (2048 characters)
+short url          -> 17 bytes (17 characters)
+created-at time    -> 7 bytes (7 characters)
+expiration at time -> 7 bytes (7 characters)
+-----------------------------------
+					2.031 kb
+
+
+30 M users -> 60.7 GB/months -> 0.7 TB/year -> 3.6 TB/5 years
+
+
+7 character random ID
+----------------------
+
+Two algorithms -> Base62 and MD5 hash
+
+Base62 [a-z, A-Z, 0-9] [26 + 26 + 10 = 62]
+
+We can get 62(pow)7 =3.5 triilion unique
+
+algorithm to convert to base 62
+--------------------------------
+public String base62Encode(int number){
+	String s="0123456789abcdefghijklmnopqrstuvwxyxABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	String hashStr = "";
+	while(number > 0){
+		hashStr = s[number % 62] + hasgStr;
+		number = number/62; 
+	}
+	return hashStr;
+}
+
+
+Database to use
+-----------------
+NoSql - Eventual consistence, High available, easily scalable
+
+Storing to DB
+-----------------
+
+					CACHE
+					  |
+					  |
+user->LB ->     App server1------ DB
+				App server2------ DB
+				App server3------ DB
+				     |
+				     |
+				     |
+Zookeeper will maintain counter range for every server
+  AS1- 1L to 2L
+  AS2- 2L to 3L
+  As3- 3L to 4L
+
+  If new server added given new range....if range is exhausted then assign new one
+
